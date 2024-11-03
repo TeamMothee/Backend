@@ -1,11 +1,12 @@
 asgiref==3.8.1
 Django==5.1.2
 djangorestframework==3.15.2
-
 #swagger
 drf-yasg==1.21.8
 inflection==0.5.1
 packaging==24.1
+#postgresql
+psycopg2==2.9.10
 pytz==2024.2
 PyYAML==6.0.2
 sqlparse==0.5.1
