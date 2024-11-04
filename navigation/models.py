@@ -11,28 +11,26 @@ class Detection(models.Model):
     사용자 제보 위험 구조물
     """
 
-    user_id = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="detected_danger"
-    )
+    # user_id = models.ForeignKey(
+    #     User, on_delete=models.CASCADE, related_name="detected_danger"
+    # )
     image = models.ImageField(upload_to="images/")
     latitude = models.FloatField()
     longitude = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     @classmethod
-    def create(cls, user_id, image, latitude, longitude):
-        detection = cls(
-            user_id=user_id, image=image, latitude=latitude, longitude=longitude
-        )
-        return detection
+    def create_table(cls, image, latitude, longitude):
+        detection = cls(image=image, latitude=latitude, longitude=longitude)
+        detection.save()
 
     @classmethod
-    def delete(cls, latitude, longitude):
+    def delete_table(cls, latitude, longitude):
         try:
             detection = cls.objects.get(latitude=latitude, longitude=longitude)
             detection.delete()
         except cls.DoesNotExist:
-            raise ValueError("Detection does not exist")
+            pass
 
 
 class RoadStructure(models.Model):
@@ -49,26 +47,21 @@ class RoadStructure(models.Model):
     longitude = models.FloatField()
 
     @classmethod
-    def create(cls, braille_block, audio_signal, bollard, weight, latitude, longitude):
+    def create_table(cls, **kwargs):
         road_structure = cls(
-            braille_block=braille_block,
-            audio_signal=audio_signal,
-            bollard=bollard,
-            weight=weight,
-            latitude=latitude,
-            longitude=longitude,
+            braille_block=kwargs.get("braille_block"),
+            audio_signal=kwargs.get("audio_signal"),
+            bollard=kwargs.get("bollard"),
+            weight=kwargs.get("weight"),
+            latitude=kwargs.get("latitude"),
+            longitude=kwargs.get("longitude"),
         )
-        return road_structure
+        road_structure.save()
 
     @classmethod
-    def delete(cls, latitude, longitude):
+    def delete_table(cls, latitude, longitude):
         try:
             road_structure = cls.objects.get(latitude=latitude, longitude=longitude)
             road_structure.delete()
         except cls.DoesNotExist:
-            raise ValueError("Road Structure does not exist")
-
-
-
-
-
+            pass
