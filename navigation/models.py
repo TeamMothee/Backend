@@ -1,9 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import Group, Permission
 
 
 class User(AbstractUser):
-    pass
+    # 기본 내장 auth 앱의 User 모델과 사용자 정의 users 앱의 User 모델 사이의 충돌 방지
+    groups = models.ManyToManyField(Group, related_name="custom_user_set")
+    user_permissions = models.ManyToManyField(
+        Permission, related_name="custom_user_set"
+    )
 
 
 class Detection(models.Model):
