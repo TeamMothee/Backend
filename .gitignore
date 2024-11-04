@@ -2,6 +2,8 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=django
 
 .DS_Store
+**/migrations/*.py
+!**/migrations/__init__.py
 
 ### Django ###
 *.log
