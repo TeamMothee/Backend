@@ -13,20 +13,38 @@ class FindPathView(APIView):
         operation_description="Find the path to the destination",
         manual_parameters=[
             openapi.Parameter(
+                "origin",
+                openapi.IN_QUERY,
+                description="사용자의 출발지",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
                 "destination",
                 openapi.IN_QUERY,
                 description="사용자의 목적지",
                 type=openapi.TYPE_STRING,
-            )
+            ),
         ],
         responses={
             200: "OK",
+            400: "Invalid input arguments",
         },
     )
     def get(self, request, *args, **kwargs):
-        destination = request.GET.get("destination")
+        origin = request.query_params.get("origin")
+        if not origin:
+            Response(
+                {"error": "출발지를 입력해주세요"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        destination = request.query_params.get("destination")
+        if not destination:
+            Response(
+                {"error": "도착지를 입력해주세요"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
         # path = find_path(destination)  # TODO: route finding algorithm
-        path = {
+        path = {  # 임시로 작성함
+            "origin": origin,
             "destination": destination,
             "path": "찾은 경로",
         }
@@ -62,7 +80,7 @@ class ReportView(APIView):
         Detection.create_table(image, latitude, longitude)
         # AI 모델로 위험 구조물 탐지
         # road_structure = detect_danger(image)
-        road_structure = {
+        road_structure = {  # 임시로 작성함
             "braille_block": 0,
             "audio_signal": 1,
             "bollard": 2,
