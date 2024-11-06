@@ -4,6 +4,8 @@ from rest_framework import status
 from .models import Detection, RoadStructure
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from backend.settings import TMAP
+import requests
 
 
 # Create your views here.
@@ -91,4 +93,40 @@ class ReportView(APIView):
         RoadStructure.create_table(**road_structure)
         Detection.delete_table(latitude, longitude)
 
+        return Response(status=status.HTTP_200_OK)
+
+
+class CallTmapView(APIView):
+    @swagger_auto_schema(
+        operation_summary="Tmap API 호출",
+        operation_description="Call Tmap API",
+        responses={
+            200: "OK",
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        url = TMAP["API_URL"]
+        headers = {
+            "appKey": TMAP["APP_KEY"],
+            "Accept-Language": "ko",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "startX": 126.92365493654832,
+            "startY": 37.556770374096615,
+            "angle": 20,
+            "speed": 30,
+            "endPoiId": "10001",
+            "endX": 126.92432158129688,
+            "endY": 37.55279861528311,
+            "passList": "126.92774822,37.55395475_126.92577620,37.55337145",
+            "reqCoordType": "WGS84GEO",
+            "startName": "%EC%B6%9C%EB%B0%9C",
+            "endName": "%EB%8F%84%EC%B0%A9",
+            "searchOption": "0",
+            "resCoordType": "WGS84GEO",
+            "sort": "index",
+        }
+        response = requests.post(url, headers=headers, json=payload).json()
+        print(response)
         return Response(status=status.HTTP_200_OK)

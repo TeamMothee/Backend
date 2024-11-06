@@ -26,6 +26,10 @@ env.read_env(os.path.join(BASE_DIRNAME, ".env"))  # Read .env file
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY")
+TMAP = {
+    "API_URL": os.environ.get("TMAP_API_URL"),
+    "APP_KEY": os.environ.get("TMAP_APP_KEY"),
+}
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
