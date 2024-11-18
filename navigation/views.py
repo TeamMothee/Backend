@@ -2,11 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Detection, RoadStructure
+from .function import *
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from backend.settings import TMAP
 import requests
-
+import os
 
 # Create your views here.
 class FindPathView(APIView):
@@ -45,6 +46,8 @@ class FindPathView(APIView):
             )
 
         # path = find_path(destination)  # TODO: route finding algorithm
+        
+        
         path = {  # 임시로 작성함
             "origin": origin,
             "destination": destination,
@@ -52,48 +55,6 @@ class FindPathView(APIView):
         }
         return Response(path, status=status.HTTP_200_OK)
 
-
-class ReportView(APIView):
-    @swagger_auto_schema(
-        operation_summary="위험 구조물 제보",
-        operation_description="Report a dangerous structure",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                "image": openapi.Schema(type=openapi.TYPE_STRING),
-                "latitude": openapi.Schema(type=openapi.TYPE_NUMBER),
-                "longitude": openapi.Schema(type=openapi.TYPE_NUMBER),
-            },
-        ),
-        responses={
-            200: "OK",
-            400: "Invalid input arguments",
-        },
-    )
-    def patch(self, request, *args, **kwargs):
-        try:
-            image = request.data["image"]
-            latitude = request.data["latitude"]
-            longitude = request.data["longitude"]
-        except KeyError:
-            return Response(
-                {"error": "Invalid input arguments"}, status=status.HTTP_400_BAD_REQUEST
-            )
-        Detection.create_table(image, latitude, longitude)
-        # AI 모델로 위험 구조물 탐지
-        # road_structure = detect_danger(image)
-        road_structure = {  # 임시로 작성함
-            "braille_block": 0,
-            "audio_signal": 1,
-            "bollard": 2,
-            "weight": 10,
-            "latitude": latitude,
-            "longitude": longitude,
-        }
-        RoadStructure.create_table(**road_structure)
-        Detection.delete_table(latitude, longitude)
-
-        return Response(status=status.HTTP_200_OK)
 
 
 class CallTmapView(APIView):
@@ -130,3 +91,81 @@ class CallTmapView(APIView):
         response = requests.post(url, headers=headers, json=payload).json()
         print(response)
         return Response(status=status.HTTP_200_OK)
+
+
+class PedestrianRouteView(APIView):
+    @swagger_auto_schema(
+        operation_summary="보행자 경로 탐색",
+        operation_description="출발지, 목적지, 경유지를 기반으로 보행자 경로를 계산합니다.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "startX": openapi.Schema(type=openapi.TYPE_NUMBER, description="출발지 경도"),
+                "startY": openapi.Schema(type=openapi.TYPE_NUMBER, description="출발지 위도"),
+                "endX": openapi.Schema(type=openapi.TYPE_NUMBER, description="목적지 경도"),
+                "endY": openapi.Schema(type=openapi.TYPE_NUMBER, description="목적지 위도"),
+                "passList": openapi.Schema(type=openapi.TYPE_STRING, description="경유지 리스트 (Optional)"),
+                "angle": openapi.Schema(type=openapi.TYPE_NUMBER, description="각도 (Optional)", default=0),
+                "speed": openapi.Schema(type=openapi.TYPE_NUMBER, description="속도 (Optional)", default=0),
+                "endPoiId": openapi.Schema(type=openapi.TYPE_STRING, description="목적지 POI ID (Optional)", default=""),
+            },
+            required=["startX", "startY", "endX", "endY"]
+        ),
+        responses={
+            200: openapi.Response(
+                description="경로 계산 성공",
+                examples={
+                    "application/json": {
+                        "type": "FeatureCollection",
+                        "features": [
+                            {
+                                "type": "Feature",
+                                "geometry": {
+                                    "type": "Point",
+                                    "coordinates": [126.92365493654832, 37.556770374096615]
+                                },
+                                "properties": {
+                                    "totalDistance": 1000,
+                                    "totalTime": 600,
+                                    "description": "경로 설명"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ),
+            400: "잘못된 요청입니다. (출발지와 목적지를 입력하세요.)",
+            500: "서버 내부 오류"
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        # 요청 데이터 가져오기
+        startX = request.data.get("startX")
+        startY = request.data.get("startY")
+        endX = request.data.get("endX")
+        endY = request.data.get("endY")
+
+        # 필수 데이터 검증
+        if not all([startX, startY, endX, endY]):
+            return Response({"error": "출발지와 목적지를 입력하세요."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 출발지와 목적지 좌표
+        start = (startX, startY)
+        end = (endX, endY)
+
+        # PostgreSQL에서 후보 좌표들 가져오기 (예시로 Location 테이블에서 가져옴)
+        locations = RoadStructure.objects.all()  # 전체 좌표를 가져옴
+        candidates = [(loc.longitude, loc.latitude, loc.weight) for loc in locations]  # safety_score는 weight에 해당
+
+        # 출발점과 목적점 사이의 원 내에서 경유지 후보 필터링
+        midpoint, radius = calculate_midpoint_and_circle(start, end)
+        filtered_candidates = points_within_circle(candidates, midpoint, radius)
+        optimal_filtered_candidates=select_highest_safety_points(filtered_candidates)
+
+        optimal_route_response = find_optimal_route(start, end, optimal_filtered_candidates, alpha=1.5)
+
+        if not optimal_route_response:
+            return Response({"error": "최적 경로를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+
+        # TMap API 응답 그대로 반환
+        return Response(optimal_route_response, status=status.HTTP_200_OK)
