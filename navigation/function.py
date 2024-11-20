@@ -1,5 +1,5 @@
 import requests
-import os
+from backend.settings import TMAP
 from urllib.parse import quote
 
 
@@ -54,11 +54,10 @@ def calculate_path_response(start, end, passList=None):
     :param passList: 경유지 리스트
     :return: TMap API 응답 데이터 또는 None
     """
-    url = "https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1"
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "appKey": os.environ.get("TMAP_APP_KEY"),
+        "appKey": TMAP.APP_KEY,
     }
 
     payload = {
@@ -78,7 +77,7 @@ def calculate_path_response(start, end, passList=None):
         payload["passList"] = "_".join([f"{p[0]},{p[1]}" for p in passList])
 
     try:
-        response = requests.post(url, json=payload, headers=headers)
+        response = requests.post(TMAP.API_URL, json=payload, headers=headers)
         if response.status_code == 200:
             return response.json()
         else:

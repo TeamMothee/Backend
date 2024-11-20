@@ -5,9 +5,6 @@ from .models import RoadStructure
 from .function import *
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from backend.settings import TMAP
-import requests
-import os
 
 
 class FindRouteView(APIView):
@@ -16,25 +13,25 @@ class FindRouteView(APIView):
         operation_description="Find route to the destination",
         manual_parameters=[
             openapi.Parameter(
-                "startX",
+                "start_x",
                 openapi.IN_QUERY,
                 description="출발지 경도",
                 type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
-                "startY",
+                "start_y",
                 openapi.IN_QUERY,
                 description="출발지 위도",
                 type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
-                "endX",
+                "end_x",
                 openapi.IN_QUERY,
                 description="목적지 경도",
                 type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
-                "endY",
+                "end_y",
                 openapi.IN_QUERY,
                 description="목적지 위도",
                 type=openapi.TYPE_STRING,
@@ -47,16 +44,16 @@ class FindRouteView(APIView):
         },
     )
     def get(self, request, *args, **kwargs):
-        startX = request.data.get("startX")
-        startY = request.data.get("startY")
-        endX = request.data.get("endX")
-        endY = request.data.get("endY")
-        if not all([startX, startY, endX, endY]):
+        start_x = request.data.get("start_x")
+        start_y = request.data.get("start_y")
+        end_x = request.data.get("end_x")
+        end_y = request.data.get("end_y")
+        if not all([start_x, start_y, end_x, end_y]):
             return Response(
                 {"error": "Invalid input arguments"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        route = self.find_route(startX, startY, endX, endY)
+        route = self.find_route(start_x, start_y, end_x, end_y)
         if not route:
             return Response(
                 {"error": "Route not found"},
@@ -64,10 +61,10 @@ class FindRouteView(APIView):
             )
         return Response(route, status=status.HTTP_200_OK)
 
-    def find_route(self, startX, startY, endX, endY):
+    def find_route(self, start_x, start_y, end_x, end_y):
         # 출발지와 목적지 좌표
-        start = (startX, startY)
-        end = (endX, endY)
+        start = (float(start_x), float(start_y))
+        end = (float(end_x), float(end_y))
 
         # PostgreSQL에서 후보 좌표들 가져오기
         locations = RoadStructure.objects.all()  # 전체 좌표를 가져옴
