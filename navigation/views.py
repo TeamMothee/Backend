@@ -91,7 +91,6 @@ class ReportView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                "image": openapi.Schema(type=openapi.TYPE_STRING),
                 "latitude": openapi.Schema(type=openapi.TYPE_NUMBER),
                 "longitude": openapi.Schema(type=openapi.TYPE_NUMBER),
             },
