@@ -3,7 +3,7 @@
 [Figma - wire frame](https://www.figma.com/design/2Ze9iPebhLjcLQZB73B2hR/Wire-Frame?node-id=0-1&node-type=canvas&t=kvfpOp0nnYWQqYOI-0)  
 
 ## [DB ERD](https://dbdiagram.io/d/Capstone-Design-I-6709dc9597a66db9a3b8b136)  
-![DB_ERD](imgs/DB_ERD.png)  
+![DB_ERD](imgs/DB_ERD_v2.png)  
 
 ## Package Installation
 ```bash
