@@ -134,9 +134,17 @@ def find_optimal_route(start, end, candidates, alpha=1.5):
             optimal_response["features"][0]["properties"].get("totalTime", float("inf"))
             > alpha * shortest_time
         ):
-            return None
+            return shortest_response
 
         return optimal_response
+    
+    elif len(candidates) == 1:
+        a = candidates[0]
+        path = calculate_path_response(start, end, passList=[a])
 
-    # 후보 점이 없거나 1개인 경우
+        if path:
+            path_time = path["features"][0]["properties"].get("totalTime", float("inf"))
+            if path_time <= alpha * shortest_time:
+                return path
+            
     return shortest_response
