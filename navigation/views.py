@@ -139,10 +139,9 @@ class CallImageCaptionView(APIView):
             400: "Invalid input arguments",
         },
     )
-    def post(self, request, *args, **kwargs):
-        try:
-            image = request.data["image"]
-        except KeyError:
+    def get(self, request, *args, **kwargs):
+        image = request.data.get("image")
+        if not image:
             return Response(
                 {"error": "Invalid input arguments"}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -164,10 +163,9 @@ class CallbackImageCaptionView(APIView):
             400: "Invalid input arguments",
         },
     )
-    def post(self, request, *args, **kwargs):
-        try:
-            caption = request.data["caption"]
-        except KeyError:
+    def get(self, request, *args, **kwargs):
+        caption = request.data.get("caption")
+        if not caption:
             return Response(
                 {"error": "Invalid input arguments"}, status=status.HTTP_400_BAD_REQUEST
             )
