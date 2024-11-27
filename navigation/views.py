@@ -122,3 +122,53 @@ class ReportView(APIView):
             )
 
         return Response(status=status.HTTP_200_OK)
+
+
+class CallImageCaptionView(APIView):
+    @swagger_auto_schema(
+        operation_summary="이미지 캡션 생성",
+        operation_description="Create a caption for the image",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "image": openapi.Schema(type=openapi.TYPE_STRING),
+            },
+        ),
+        responses={
+            200: "OK",
+            400: "Invalid input arguments",
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        try:
+            image = request.data["image"]
+        except KeyError:
+            return Response(
+                {"error": "Invalid input arguments"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response(image, status=status.HTTP_200_OK)
+
+
+class CallbackImageCaptionView(APIView):
+    @swagger_auto_schema(
+        operation_summary="이미지 캡션 반환",
+        operation_description="Return the caption for the image",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "caption": openapi.Schema(type=openapi.TYPE_STRING),
+            },
+        ),
+        responses={
+            200: "OK",
+            400: "Invalid input arguments",
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        try:
+            caption = request.data["caption"]
+        except KeyError:
+            return Response(
+                {"error": "Invalid input arguments"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response(caption, status=status.HTTP_200_OK)
