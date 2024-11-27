@@ -3,7 +3,6 @@ from .views import (
     FindRouteView,
     ReportView,
     CallImageCaptionView,
-    CallbackImageCaptionView,
 )
 
 app_name = "navigation"
@@ -13,10 +12,5 @@ urlpatterns = [
     path("report/", ReportView.as_view(), name="report"),
     path(
         "call_image_caption/", CallImageCaptionView.as_view(), name="call_image_caption"
-    ),
-    path(
-        "callback_image_caption/",
-        CallbackImageCaptionView.as_view(),
-        name="callback_image_caption",
     ),
 ]

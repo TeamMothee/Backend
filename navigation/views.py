@@ -100,7 +100,7 @@ class ReportView(APIView):
             400: "Invalid input arguments",
         },
     )
-    def patch(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         try:
             latitude = request.data["latitude"]
             longitude = request.data["longitude"]
@@ -145,28 +145,8 @@ class CallImageCaptionView(APIView):
             return Response(
                 {"error": "Invalid input arguments"}, status=status.HTTP_400_BAD_REQUEST
             )
-        return Response(image, status=status.HTTP_200_OK)
-
-
-class CallbackImageCaptionView(APIView):
-    @swagger_auto_schema(
-        operation_summary="이미지 캡션 반환",
-        operation_description="Return the caption for the image",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                "caption": openapi.Schema(type=openapi.TYPE_STRING),
-            },
-        ),
-        responses={
-            200: "OK",
-            400: "Invalid input arguments",
-        },
-    )
-    def get(self, request, *args, **kwargs):
-        caption = request.data.get("caption")
-        if not caption:
-            return Response(
-                {"error": "Invalid input arguments"}, status=status.HTTP_400_BAD_REQUEST
-            )
+        url = "http://"  # 이미지 캡션 생성 API 주소
+        headers = {"Authorization": "Token 123456"}
+        payload = {"image": image}
+        caption = requests.post(url, headers=headers, json=payload).json()
         return Response(caption, status=status.HTTP_200_OK)
