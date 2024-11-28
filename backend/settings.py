@@ -30,6 +30,7 @@ TMAP = {
     "API_URL": os.environ.get("TMAP_API_URL"),
     "APP_KEY": os.environ.get("TMAP_APP_KEY"),
 }
+AI_URL = os.environ.get("AI_URL")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

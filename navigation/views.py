@@ -1,10 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from backend.settings import AI_URL
 from .models import RoadStructure
 from .function import *
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+import requests
 
 
 class FindRouteView(APIView):
@@ -100,7 +102,7 @@ class ReportView(APIView):
             400: "Invalid input arguments",
         },
     )
-    def patch(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         try:
             latitude = request.data["latitude"]
             longitude = request.data["longitude"]
@@ -122,3 +124,31 @@ class ReportView(APIView):
             )
 
         return Response(status=status.HTTP_200_OK)
+
+
+class CallImageCaptionView(APIView):
+    @swagger_auto_schema(
+        operation_summary="이미지 캡션 생성",
+        operation_description="Create a caption for the image",
+        manual_parameters=[
+            openapi.Parameter(
+                "image",
+                openapi.IN_QUERY,
+                description="이미지",
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+        responses={
+            200: "OK",
+            400: "Invalid input arguments",
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        image = request.data.get("image")
+        if not image:
+            return Response(
+                {"error": "Invalid input arguments"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        payload = {"image": image}
+        caption = requests.post(AI_URL, json=payload)
+        return Response(caption, status=status.HTTP_200_OK)
