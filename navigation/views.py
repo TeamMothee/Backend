@@ -102,7 +102,7 @@ class ReportView(APIView):
             400: "Invalid input arguments",
         },
     )
-    def post(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         try:
             latitude = request.data["latitude"]
             longitude = request.data["longitude"]
@@ -124,7 +124,6 @@ class ReportView(APIView):
             )
 
         return Response(status=status.HTTP_200_OK)
-
 
 class CallImageCaptionView(APIView):
     @swagger_auto_schema(
