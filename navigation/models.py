@@ -19,7 +19,7 @@ class RoadStructure(models.Model):
     braille_block = models.FloatField()  # 설치 0, 미흡 1, 미설치 2
     audio_signal = models.FloatField()  # 설치 0, 미설치 1
     bollard = models.FloatField()  # 미설치 0, 제대로 된 설치 1, 미설치 2
-    weight = models.FloatField()  # 위험도(가중치)
+    weight = models.FloatField(default=0.0)  # 위험도(가중치)
     latitude = models.FloatField()
     longitude = models.FloatField()
 
