@@ -129,25 +129,30 @@ class CallImageCaptionView(APIView):
     @swagger_auto_schema(
         operation_summary="이미지 캡션 생성",
         operation_description="Create a caption for the image",
-        manual_parameters=[
-            openapi.Parameter(
-                "image",
-                openapi.IN_QUERY,
-                description="이미지",
-                type=openapi.TYPE_STRING,
-            ),
-        ],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "image": openapi.Schema(type=openapi.TYPE_FILE),
+            },
+        ),
         responses={
             200: "OK",
             400: "Invalid input arguments",
+            404: "Failed to generate caption",
         },
     )
-    def get(self, request, *args, **kwargs):
-        image = request.query_params.get("image")
-        if not image:
+    def patch(self, request, *args, **kwargs):
+        try:
+            image = request.data["image"]
+        except KeyError:
             return Response(
                 {"error": "Invalid input arguments"}, status=status.HTTP_400_BAD_REQUEST
             )
         payload = {"image": image}
         caption = requests.post(AI_URL, json=payload)
+        if caption.status_code != 200:
+            return Response(
+                {"error": "Failed to generate caption"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
         return Response(caption, status=status.HTTP_200_OK)
