@@ -57,11 +57,7 @@ def calculate_path_response(start, end, passList=None):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-<<<<<<< HEAD
         "appKey": TMAP['APP_KEY'],
-=======
-        "appKey": TMAP["APP_KEY"],
->>>>>>> main
     }
 
     payload = {
