@@ -16,11 +16,17 @@ class RoadStructure(models.Model):
     교차점 별 위험 구조물 여부
     """
 
-    braille_block = models.FloatField()  # 설치 0, 미흡 1, 미설치 2
-    audio_signal = models.FloatField()  # 설치 0, 미설치 1
-    bollard = models.FloatField()  # 미설치 0, 제대로 된 설치 1, 미설치 2
-    weight = models.FloatField(default=0.0)  # 위험도(가중치)
+    # 점자블록(설치 0, 미흡 1, 미설치 2)
+    braille_block = models.IntegerField(default=0, blank=True)
+    # 음향신호기(설치 0, 미설치 1)
+    audio_signal = models.IntegerField(default=0, blank=True)
+    # 볼라드(미설치 0, 올바른 설치 1, 잘못된 설치 2)
+    bollard = models.IntegerField(default=0, blank=True)
+    # 위험도(가중치)
+    weight = models.FloatField(default=0.0, blank=True)
+    # 위도
     latitude = models.FloatField()
+    # 경도
     longitude = models.FloatField()
 
     @classmethod

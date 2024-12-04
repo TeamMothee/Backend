@@ -112,13 +112,13 @@ class ReportView(APIView):
             )
 
         # 이미 존재하는 구조물이면 DB 업데이트(weight 증가), 없으면 새로 추가
-        road_structure = RoadStructure.objects.filter(
-            latitude=latitude, longitude=longitude
-        )
-        if road_structure.exists():
+        try:
+            road_structure = RoadStructure.objects.get(
+                latitude=latitude, longitude=longitude
+            )
             road_structure.weight += 0.5
             road_structure.save()
-        else:
+        except RoadStructure.DoesNotExist:
             RoadStructure.objects.create(
                 latitude=latitude, longitude=longitude, weight=0.5
             )
