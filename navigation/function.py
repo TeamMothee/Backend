@@ -57,7 +57,7 @@ def calculate_path_response(start, end, passList=None):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "appKey": TMAP['APP_KEY'],
+        "appKey": TMAP["APP_KEY"],
     }
 
     payload = {
@@ -77,7 +77,7 @@ def calculate_path_response(start, end, passList=None):
         payload["passList"] = "_".join([f"{p[0]},{p[1]}" for p in passList])
 
     try:
-        response = requests.post(TMAP['API_URL'], json=payload, headers=headers)
+        response = requests.post(TMAP["API_URL"], json=payload, headers=headers)
         if response.status_code == 200:
             return response.json()
         else:
@@ -136,7 +136,7 @@ def find_optimal_route(start, end, candidates, alpha=2.0):
             return shortest_response
 
         return optimal_response
-    
+
     elif len(candidates) == 1:
         a = candidates[0]
         path = calculate_path_response(start, end, passList=[a])
@@ -145,5 +145,5 @@ def find_optimal_route(start, end, candidates, alpha=2.0):
             path_time = path["features"][0]["properties"].get("totalTime", float("inf"))
             if path_time <= alpha * shortest_time:
                 return path
-            
+
     return shortest_response
