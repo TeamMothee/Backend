@@ -26,6 +26,7 @@ env.read_env(os.path.join(BASE_DIRNAME, ".env"))  # Read .env file
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+load_dotenv()
 SECRET_KEY = os.environ.get("SECRET_KEY")
 TMAP = {
     "API_URL": os.environ.get("TMAP_API_URL"),
