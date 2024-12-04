@@ -44,10 +44,10 @@ class FindRouteView(APIView):
         },
     )
     def get(self, request, *args, **kwargs):
-        start_x = request.data.get("start_x")
-        start_y = request.data.get("start_y")
-        end_x = request.data.get("end_x")
-        end_y = request.data.get("end_y")
+        start_x = request.GET.get("start_x")
+        start_y = request.GET.get("start_y")
+        end_x = request.GET.get("end_x")
+        end_y = request.GET.get("end_y")
         if not all([start_x, start_y, end_x, end_y]):
             return Response(
                 {"error": "Invalid input arguments"}, status=status.HTTP_400_BAD_REQUEST
