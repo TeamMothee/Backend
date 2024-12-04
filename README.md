@@ -2,14 +2,31 @@
 [Notion - backend](https://www.notion.so/Backend-58ac040d70f445a88259659d4ba05981?pvs=4)  
 [Figma - wire frame](https://www.figma.com/design/2Ze9iPebhLjcLQZB73B2hR/Wire-Frame?node-id=0-1&node-type=canvas&t=kvfpOp0nnYWQqYOI-0)  
 
-## [DB ERD](https://dbdiagram.io/d/Capstone-Design-I-6709dc9597a66db9a3b8b136)  
-![DB_ERD](imgs/DB_ERD_v2.png)  
+## 실행 방법
+`Python 3.12` version에서 테스트되었습니다.  
 
-## Package Installation
-```bash
-pip freeze > requirements.txt
+가상환경 생성 및 활성화 (필요하면 실행)
+```shell
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+필요한 패키지 설치
+```shell
 pip install -r requirements.txt
 ```
+
+서버 실행
+```shell
+# 최초 실행 시에만 필요
+python3 manage.py makemigrations
+python3 manage.py migrate
+# 서버 실행
+python3 manage.py runserver
+```
+
+## [DB ERD](https://dbdiagram.io/d/Capstone-Design-I-6709dc9597a66db9a3b8b136)  
+![DB_ERD](imgs/DB_ERD_v2.png)  
 
 ## Commit Convention
 |Tag Name|Description|
