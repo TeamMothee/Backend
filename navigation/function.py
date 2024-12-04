@@ -30,9 +30,9 @@ def points_within_circle(points, center, radius):
         distance = ((point[0] - center[0]) ** 2 + (point[1] - center[1]) ** 2) ** 0.5
 
         # 거리가 반지름 이내인 점을 필터링
-        if distance <= radius:
+        if distance <= radius*1.5:
             filtered_points.append(point)
-
+    print(filtered_points)
     return filtered_points
 
 
@@ -88,7 +88,7 @@ def calculate_path_response(start, end, passList=None):
         return None
 
 
-def find_optimal_route(start, end, candidates, alpha=1.5):
+def find_optimal_route(start, end, candidates, alpha=2.0):
     """
     최적 경로의 TMap API 응답 데이터를 반환합니다.
     :param start: 출발지 좌표 (x, y)
@@ -105,7 +105,7 @@ def find_optimal_route(start, end, candidates, alpha=1.5):
     shortest_time = shortest_response["features"][0]["properties"].get(
         "totalTime", float("inf")
     )
-
+    
     # 후보 점이 2개일 경우 처리
     if len(candidates) >= 2:
         a, b = candidates[:2]  # 첫 두 후보를 a, b로 설정
@@ -118,7 +118,7 @@ def find_optimal_route(start, end, candidates, alpha=1.5):
 
         # 유효한 응답만 필터링
         valid_paths = [r for r in paths if r]
-
+        
         # 유효한 경로가 없으면 최단 경로 응답 반환
         if not valid_paths:
             return shortest_response
@@ -128,8 +128,7 @@ def find_optimal_route(start, end, candidates, alpha=1.5):
             valid_paths,
             key=lambda r: r["features"][0]["properties"].get("totalTime", float("inf")),
         )
-
-        # 최적 경로 시간이 alpha 배수보다 크면 None 반환
+        # 최적 경로 시간이 alpha 배수보다 크면 변경
         if (
             optimal_response["features"][0]["properties"].get("totalTime", float("inf"))
             > alpha * shortest_time
