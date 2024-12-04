@@ -143,6 +143,7 @@ class CallImageCaptionView(APIView):
             200: "OK",
             400: "Invalid input arguments",
             404: "Failed to generate caption",
+            500: "Internal server error",
         },
     )
     def patch(self, request, *args, **kwargs):
