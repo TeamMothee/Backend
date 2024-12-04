@@ -1,10 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from backend.settings import AI_URL
 from .models import RoadStructure
 from .function import *
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+import requests
 
 
 class FindRouteView(APIView):
@@ -110,15 +112,47 @@ class ReportView(APIView):
             )
 
         # 이미 존재하는 구조물이면 DB 업데이트(weight 증가), 없으면 새로 추가
-        road_structure = RoadStructure.objects.filter(
-            latitude=latitude, longitude=longitude
-        )
-        if road_structure.exists():
+        try:
+            road_structure = RoadStructure.objects.get(
+                latitude=latitude, longitude=longitude
+            )
             road_structure.weight += 0.5
             road_structure.save()
-        else:
+        except RoadStructure.DoesNotExist:
             RoadStructure.objects.create(
                 latitude=latitude, longitude=longitude, weight=0.5
             )
 
         return Response(status=status.HTTP_200_OK)
+
+class CallImageCaptionView(APIView):
+    @swagger_auto_schema(
+        operation_summary="이미지 캡션 생성",
+        operation_description="Create a caption for the image",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "image": openapi.Schema(type=openapi.TYPE_FILE),
+            },
+        ),
+        responses={
+            200: "OK",
+            400: "Invalid input arguments",
+            404: "Failed to generate caption",
+        },
+    )
+    def patch(self, request, *args, **kwargs):
+        try:
+            image = request.data["image"]
+        except KeyError:
+            return Response(
+                {"error": "Invalid input arguments"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        payload = {"image": image}
+        caption = requests.post(AI_URL, json=payload)
+        if caption.status_code != 200:
+            return Response(
+                {"error": "Failed to generate caption"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response(caption, status=status.HTTP_200_OK)

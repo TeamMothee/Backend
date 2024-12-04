@@ -11,44 +11,22 @@ class User(AbstractUser):
     )
 
 
-class Detection(models.Model):
-    """
-    사용자 제보 위험 구조물
-    """
-
-    # user_id = models.ForeignKey(
-    #     User, on_delete=models.CASCADE, related_name="detected_danger"
-    # )
-    image = models.ImageField(upload_to="images/")
-    latitude = models.FloatField()
-    longitude = models.FloatField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    @classmethod
-    def create_table(cls, image, latitude, longitude):
-        detection = cls(image=image, latitude=latitude, longitude=longitude)
-        detection.save()
-
-    @classmethod
-    def delete_table(cls, latitude, longitude):
-        try:
-            detection = cls.objects.get(latitude=latitude, longitude=longitude)
-            detection.delete()
-        except cls.DoesNotExist:
-            pass
-
-
 class RoadStructure(models.Model):
     """
     교차점 별 위험 구조물 여부
     """
 
-    # 설치 0, 미흡 1, 미설치 2
-    braille_block = models.FloatField()
-    audio_signal = models.FloatField()
-    bollard = models.FloatField()
-    weight = models.IntegerField()  # 가중치
+    # 점자블록(설치 0, 미흡 1, 미설치 2)
+    braille_block = models.IntegerField(default=0, blank=True)
+    # 음향신호기(설치 0, 미설치 1)
+    audio_signal = models.IntegerField(default=0, blank=True)
+    # 볼라드(미설치 0, 올바른 설치 1, 잘못된 설치 2)
+    bollard = models.IntegerField(default=0, blank=True)
+    # 위험도(가중치)
+    weight = models.FloatField(default=0.0, blank=True)
+    # 위도
     latitude = models.FloatField()
+    # 경도
     longitude = models.FloatField()
 
     @classmethod
