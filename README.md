@@ -22,7 +22,7 @@ pip install -r requirements.txt
 python3 manage.py makemigrations
 python3 manage.py migrate
 # 서버 실행
-python3 manage.py runserver 0.0.0.0:28080
+python3 manage.py runserver
 ```
 
 ## [DB ERD](https://dbdiagram.io/d/Capstone-Design-I-6709dc9597a66db9a3b8b136)  
