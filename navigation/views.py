@@ -1,3 +1,5 @@
+import io
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -7,6 +9,7 @@ from .function import *
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import requests
+from PIL import Image
 
 
 class FindRouteView(APIView):
@@ -46,10 +49,10 @@ class FindRouteView(APIView):
         },
     )
     def get(self, request, *args, **kwargs):
-        start_x = request.query_params.get("start_x")
-        start_y = request.query_params.get("start_y")
-        end_x = request.query_params.get("end_x")
-        end_y = request.query_params.get("end_y")
+        start_x = request.GET.get("start_x")
+        start_y = request.GET.get("start_y")
+        end_x = request.GET.get("end_x")
+        end_y = request.GET.get("end_y")
         if not all([start_x, start_y, end_x, end_y]):
             return Response(
                 {"error": "Invalid input arguments"}, status=status.HTTP_400_BAD_REQUEST
@@ -125,6 +128,7 @@ class ReportView(APIView):
 
         return Response(status=status.HTTP_200_OK)
 
+
 class CallImageCaptionView(APIView):
     @swagger_auto_schema(
         operation_summary="이미지 캡션 생성",
@@ -139,20 +143,45 @@ class CallImageCaptionView(APIView):
             200: "OK",
             400: "Invalid input arguments",
             404: "Failed to generate caption",
+            500: "Internal server error",
         },
     )
     def patch(self, request, *args, **kwargs):
         try:
-            image = request.data["image"]
+            # Pillow로 이미지 파일 열기
+            image = request.FILES["image"]
+            image_file = Image.open(image)
+            buffer = io.BytesIO()
+
+            # 이미지 파일 형식 변환
+            if image_file.format == "BMP":  # Bitmap 파일은 JPEG로 변환
+                image_file = image_file.convert("RGB")
+                image_file.save(buffer, format="JPEG")
+                mime_type = "image/jpeg"
+            else:  # 그 외 파일은 원래 형식 유지
+                image_file.save(buffer, format=image_file.format)
+                mime_type = image.content_type
+            buffer.seek(0)
+            files = {"image": (image.name, buffer, mime_type)}
+
+            # AI 서버로 이미지 전송
+            caption = requests.post(AI_URL, files=files)
+            if caption.status_code != 200:
+                return Response(
+                    {"error": "Failed to generate caption"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            return Response(caption, status=status.HTTP_200_OK)
+
+        # request에 이미지 파일이 없는 경우
         except KeyError:
             return Response(
                 {"error": "Invalid input arguments"}, status=status.HTTP_400_BAD_REQUEST
             )
-        payload = {"image": image}
-        caption = requests.post(AI_URL, json=payload)
-        if caption.status_code != 200:
+
+        # AI Image Captioning 서버와 통신 실패
+        except Exception as e:
             return Response(
-                {"error": "Failed to generate caption"},
-                status=status.HTTP_404_NOT_FOUND,
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-        return Response(caption, status=status.HTTP_200_OK)
