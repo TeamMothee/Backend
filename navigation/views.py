@@ -1,3 +1,5 @@
+import io
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -7,6 +9,7 @@ from .function import *
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import requests
+from PIL import Image
 
 
 class FindRouteView(APIView):
@@ -125,6 +128,7 @@ class ReportView(APIView):
 
         return Response(status=status.HTTP_200_OK)
 
+
 class CallImageCaptionView(APIView):
     @swagger_auto_schema(
         operation_summary="이미지 캡션 생성",
@@ -143,16 +147,32 @@ class CallImageCaptionView(APIView):
     )
     def patch(self, request, *args, **kwargs):
         try:
-            image = request.data["image"]
+            # 이미지 파일 가져오기
+            image = request.FILES["image"]
+
+            # Pillow로 이미지 열어서 원본 형식으로 저장
+            image_file = Image.open(image)
+            buffer = io.BytesIO()
+            image_file.save(buffer, format=image_file.format)
+            buffer.seek(0)
+
+            # AI 서버로 이미지 전송
+            files = {"image": (image.name, buffer, image.content_type)}
+            caption = requests.post(AI_URL, files=files)
+            if caption.status_code != 200:
+                return Response(
+                    {"error": "Failed to generate caption"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            return Response(caption, status=status.HTTP_200_OK)
+        # request에 이미지 파일이 없는 경우
         except KeyError:
             return Response(
                 {"error": "Invalid input arguments"}, status=status.HTTP_400_BAD_REQUEST
             )
-        payload = {"image": image}
-        caption = requests.post(AI_URL, json=payload)
-        if caption.status_code != 200:
+        # AI Image Captioning 서버와 통신 실패
+        except Exception as e:
             return Response(
-                {"error": "Failed to generate caption"},
-                status=status.HTTP_404_NOT_FOUND,
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-        return Response(caption, status=status.HTTP_200_OK)
