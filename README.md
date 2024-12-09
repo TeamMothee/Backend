@@ -26,7 +26,7 @@ python3 manage.py runserver
 ```
 
 ## [DB ERD](https://dbdiagram.io/d/Capstone-Design-I-6709dc9597a66db9a3b8b136)  
-![DB_ERD](imgs/DB_ERD_v2.png)  
+![DB_ERD](imgs/DB_ERD_v3.png)  
 
 ## Commit Convention
 |Tag Name|Description|
