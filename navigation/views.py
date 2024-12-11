@@ -171,6 +171,8 @@ class CallImageCaptionView(APIView):
                     {"error": "Failed to generate caption"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
+            caption.encoding = "utf-8"
+            caption = caption.text.strip("[]\\\"")
             return Response(caption, status=status.HTTP_200_OK)
 
         # request에 이미지 파일이 없는 경우
